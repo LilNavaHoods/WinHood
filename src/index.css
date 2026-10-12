@@ -1,0 +1,438 @@
+@import 'tailwindcss';
+
+:root {
+  font-family: "Segoe UI", Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  color-scheme: light;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background: #f4f6fa;
+}
+
+.dark-theme {
+  color: #e7edf7;
+  background: #0b1220;
+}
+
+.dark-theme main {
+  background: #0b1220;
+}
+
+.dark-theme header {
+  color: #e7edf7;
+  border-color: #263247 !important;
+  background: rgb(15 24 40 / 95%) !important;
+}
+
+.dark-theme .bg-white {
+  color: #e7edf7;
+  background-color: #151f31 !important;
+}
+
+.dark-theme .bg-\[\#f4f6fa\] {
+  background-color: #0b1220 !important;
+}
+
+.dark-theme .bg-\[\#f8f9fb\],
+.dark-theme .bg-\[\#f5f7fa\],
+.dark-theme .bg-\[\#f3f7fd\],
+.dark-theme .bg-\[\#f8fbff\],
+.dark-theme .bg-\[\#f4f8fd\],
+.dark-theme .bg-\[\#f7fbff\],
+.dark-theme .bg-slate-50,
+.dark-theme .bg-slate-100 {
+  background-color: #1b273a !important;
+}
+
+.dark-theme .border-\[\#e1e5ec\],
+.dark-theme .border-\[\#e2e6ed\],
+.dark-theme .border-\[\#e3e7ee\],
+.dark-theme .border-\[\#edf0f4\],
+.dark-theme .border-\[\#dde5ef\],
+.dark-theme .border-slate-100,
+.dark-theme .border-slate-200,
+.dark-theme .divide-\[\#edf0f4\] > :not(:last-child) {
+  border-color: #28354a !important;
+}
+
+.dark-theme .text-\[\#121b2c\],
+.dark-theme .text-\[\#172136\],
+.dark-theme .text-\[\#182236\],
+.dark-theme .text-\[\#192233\],
+.dark-theme .text-\[\#1b2639\],
+.dark-theme .text-\[\#27364d\],
+.dark-theme .text-slate-700,
+.dark-theme .text-slate-600 {
+  color: #e4eaf4 !important;
+}
+
+.dark-theme .text-slate-500 {
+  color: #9aa8bc !important;
+}
+
+.dark-theme .text-slate-400 {
+  color: #7f8da3 !important;
+}
+
+.dark-theme input {
+  color: #dce5f2 !important;
+}
+
+.dark-theme .shadow-sm {
+  box-shadow: 0 1px 3px rgb(0 0 0 / 25%);
+}
+
+.dark-theme ::-webkit-scrollbar-thumb {
+  background: #354158;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+.icon-box {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  border-radius: 10px;
+}
+
+.icon-box.small {
+  width: 31px;
+  height: 31px;
+  flex: 0 0 31px;
+  border-radius: 8px;
+}
+
+.icon-box.blue {
+  color: #0878f9;
+  background: #eaf3ff;
+}
+
+.icon-box.green {
+  color: #12956a;
+  background: #eaf9f3;
+}
+
+.icon-box.violet {
+  color: #7456dd;
+  background: #f0edff;
+}
+
+.icon-box.orange {
+  color: #dc8520;
+  background: #fff4e5;
+}
+
+/* Painel de resultado — modo claro */
+.result-panel {
+  color: #111827 !important;
+  background: #ffffff !important;
+  border: 1px solid #d7dee9 !important;
+}
+
+.result-panel__header {
+  border-bottom: 1px solid #edf0f4 !important;
+  background: #ffffff !important;
+}
+
+.result-panel__eyebrow {
+  color: #6b7280 !important;
+}
+
+.result-panel__title {
+  color: #111827 !important;
+}
+
+.result-panel__message {
+  color: #374151 !important;
+}
+
+.result-panel__message--error {
+  color: #b91c1c !important;
+}
+
+.result-panel__path {
+  color: #0878f9 !important;
+}
+
+.result-panel__badge-ok {
+  color: #059669 !important;
+  background: #ecfdf5 !important;
+}
+
+.result-panel__badge-err {
+  color: #dc2626 !important;
+  background: #fef2f2 !important;
+}
+
+.result-panel__btn {
+  border: 1px solid #e5e7eb !important;
+  border-radius: 0.5rem;
+  padding: 0.35rem 0.65rem;
+  font-size: 9px;
+  font-weight: 600;
+  color: #111827 !important;
+  background: #ffffff !important;
+}
+
+.result-panel__btn:hover {
+  border-color: #a9c9f1 !important;
+  color: #0878f9 !important;
+}
+
+.result-panel__icon-btn {
+  color: #4b5563 !important;
+  background: transparent !important;
+}
+
+.result-panel__icon-btn:hover {
+  color: #111827 !important;
+  background: #f3f4f6 !important;
+}
+
+.result-panel__body {
+  background: #ffffff !important;
+  color: #111827 !important;
+}
+
+.result-panel__card {
+  border: 1px solid #e8edf4 !important;
+  background: #f8fafc !important;
+}
+
+.result-panel__card-head {
+  border-bottom: 1px solid #edf0f4 !important;
+  color: #111827 !important;
+  background: #f8fafc !important;
+}
+
+.result-panel__row {
+  border-top: 1px solid #edf0f4 !important;
+}
+
+.result-panel__label {
+  color: #4b5563 !important;
+}
+
+.result-panel__value {
+  color: #111827 !important;
+}
+
+.result-panel__output {
+  border: 1px solid #e5e7eb !important;
+  background: #f9fafb !important;
+}
+
+.result-panel__output-head {
+  border-bottom: 1px solid #e5e7eb !important;
+  color: #111827 !important;
+  background: #f3f4f6 !important;
+}
+
+.result-panel__meta {
+  color: #6b7280 !important;
+}
+
+.result-panel__pre {
+  color: #111827 !important;
+  background: #f9fafb !important;
+}
+
+.result-panel__empty {
+  border: 1px dashed #d1d5db !important;
+  color: #4b5563 !important;
+  background: #f9fafb !important;
+}
+
+.result-panel__footer {
+  border-top: 1px solid #edf0f4 !important;
+  background: #f8fafc !important;
+}
+
+.result-panel__hint {
+  color: #6b7280 !important;
+}
+
+.result-panel__primary {
+  border-radius: 0.5rem;
+  padding: 0.5rem 1rem;
+  font-size: 10px;
+  font-weight: 600;
+  color: #ffffff !important;
+  background: #0878f9 !important;
+}
+
+.result-panel__primary:hover {
+  background: #006be6 !important;
+}
+
+/* Painel de resultado — modo escuro (texto claro em fundo escuro) */
+.dark-theme .result-panel {
+  color: #e8eef8 !important;
+  background: #151f31 !important;
+  border-color: #2a364c !important;
+}
+
+.dark-theme .result-panel__header {
+  border-bottom-color: #2a364c !important;
+  background: #151f31 !important;
+}
+
+.dark-theme .result-panel__eyebrow {
+  color: #8b9bb0 !important;
+}
+
+.dark-theme .result-panel__title {
+  color: #f1f5fb !important;
+}
+
+.dark-theme .result-panel__message {
+  color: #c5d0e0 !important;
+}
+
+.dark-theme .result-panel__message--error {
+  color: #fca5a5 !important;
+}
+
+.dark-theme .result-panel__path {
+  color: #6cb4ff !important;
+}
+
+.dark-theme .result-panel__badge-ok {
+  color: #34d399 !important;
+  background: rgba(16, 185, 129, 0.15) !important;
+}
+
+.dark-theme .result-panel__badge-err {
+  color: #f87171 !important;
+  background: rgba(239, 68, 68, 0.15) !important;
+}
+
+.dark-theme .result-panel__btn {
+  border-color: #3a4760 !important;
+  color: #e8eef8 !important;
+  background: #1b273a !important;
+}
+
+.dark-theme .result-panel__btn:hover {
+  border-color: #0878f9 !important;
+  color: #6cb4ff !important;
+}
+
+.dark-theme .result-panel__icon-btn {
+  color: #9aa8bc !important;
+}
+
+.dark-theme .result-panel__icon-btn:hover {
+  color: #f1f5fb !important;
+  background: #1b273a !important;
+}
+
+.dark-theme .result-panel__body {
+  background: #151f31 !important;
+  color: #e8eef8 !important;
+}
+
+.dark-theme .result-panel__card {
+  border-color: #2a364c !important;
+  background: #1b273a !important;
+}
+
+.dark-theme .result-panel__card-head {
+  border-bottom-color: #2a364c !important;
+  color: #e8eef8 !important;
+  background: #1b273a !important;
+}
+
+.dark-theme .result-panel__row {
+  border-top-color: #2a364c !important;
+}
+
+.dark-theme .result-panel__label {
+  color: #9aa8bc !important;
+}
+
+.dark-theme .result-panel__value {
+  color: #f1f5fb !important;
+}
+
+.dark-theme .result-panel__output {
+  border-color: #2a364c !important;
+  background: #0f172a !important;
+}
+
+.dark-theme .result-panel__output-head {
+  border-bottom-color: #2a364c !important;
+  color: #e8eef8 !important;
+  background: #1b273a !important;
+}
+
+.dark-theme .result-panel__meta {
+  color: #8b9bb0 !important;
+}
+
+.dark-theme .result-panel__pre {
+  color: #e8eef8 !important;
+  background: #0f172a !important;
+}
+
+.dark-theme .result-panel__empty {
+  border-color: #3a4760 !important;
+  color: #9aa8bc !important;
+  background: #1b273a !important;
+}
+
+.dark-theme .result-panel__footer {
+  border-top-color: #2a364c !important;
+  background: #1b273a !important;
+}
+
+.dark-theme .result-panel__hint {
+  color: #8b9bb0 !important;
+}
+
+::selection {
+  color: white;
+  background: #0878f9;
+}
+
+::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+
+::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: #c7ced9;
+}
+
+aside ::-webkit-scrollbar-thumb {
+  background: #29344b;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

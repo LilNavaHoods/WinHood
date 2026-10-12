@@ -1,0 +1,10 @@
+{
+  "description": "Provides a control panel to manage and utilize Windows support tools efficiently, enhancing user support and system troubleshooting capabilities.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}
