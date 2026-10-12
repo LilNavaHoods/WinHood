@@ -139,10 +139,10 @@ Em um terminal separado:
 
 ```bash
 # Instalar dependências
-pnpm install
+npm install
 
 # Iniciar o servidor de desenvolvimento Vite
-pnpm run dev
+npm run dev
 ```
 
 Acesse o painel no navegador no endereço informado pelo Vite (geralmente `http://localhost:5173`).
