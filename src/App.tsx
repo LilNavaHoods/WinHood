@@ -408,7 +408,7 @@ const toolModules: Record<string, ToolModule> = {
   "Gerenciar discos": {
     title: "Gerenciar discos",
     eyebrow: "Armazenamento avançado",
-    description: "Inspecione volumes e acesse ferramentas administrativas de particionamento.",
+    description: "Inspecione volumes e acesse ferramentas administrativas de particionamento com orientações claras de risco.",
     icon: "disk",
     accent: "orange",
     status: "2 discos detectados",
@@ -418,12 +418,33 @@ const toolModules: Record<string, ToolModule> = {
       { label: "Volumes", value: "3", detail: "Todos íntegros" },
     ],
     actions: [
-      { title: "Abrir Gerenciamento de Disco", description: "Interface visual para volumes e partições.", icon: "disk", meta: "diskmgmt.msc · Recomendado" },
-      { title: "Listar discos e volumes", description: "Consulta dispositivos disponíveis sem alterações.", icon: "search", meta: "Somente leitura" },
-      { title: "Guia de comandos Diskpart", description: "Consulte sintaxe e exemplos dos comandos mais usados.", icon: "terminal", meta: "Referência técnica" },
-      { title: "Iniciar Diskpart", description: "Abre o console avançado de gerenciamento de discos.", icon: "warning", meta: "Alto risco · Administrador", danger: true },
+      {
+        title: "Abrir Gerenciamento de Disco",
+        description: "Abre a interface gráfica do Windows (diskmgmt.msc) para criar, formatar ou alterar letras de partição com visualização dos discos.",
+        icon: "disk",
+        meta: "diskmgmt.msc · Seguro · Recomendado",
+      },
+      {
+        title: "Listar discos e volumes",
+        description: "Consulta somente leitura: lista discos físicos e volumes com status, estilo de partição e sistema de arquivos — não altera nada.",
+        icon: "search",
+        meta: "Somente leitura · Sem risco",
+      },
+      {
+        title: "Guia de comandos Diskpart",
+        description: "Exibe cada comando do Diskpart com explicação, nível de risco e exemplo (list, select, clean, format, etc.).",
+        icon: "terminal",
+        meta: "Referência · Sem execução",
+      },
+      {
+        title: "Iniciar Diskpart",
+        description: "Abre o console interativo diskpart.exe. Comandos digitados ali podem apagar partições se usados incorretamente.",
+        icon: "warning",
+        meta: "Alto risco · Administrador",
+        danger: true,
+      },
     ],
-    note: "Atenção: operações do Diskpart podem apagar dados permanentemente. Verifique o disco selecionado.",
+    note: "Atenção: operações do Diskpart podem apagar dados permanentemente. Confirme sempre o disco com list disk antes de clean ou format.",
   },
 };
 
@@ -1076,18 +1097,38 @@ function ResultPanel({
   onClose: () => void;
 }) {
   const [copied, setCopied] = useState(false);
+  const diskpartCommands: Array<{
+    command: string;
+    title: string;
+    description: string;
+    risk: string;
+    example: string;
+  }> = Array.isArray(result.data?.commands) ? result.data.commands : [];
+  const isDiskpartGuide = diskpartCommands.length > 0;
+  const diskInventory =
+    result.data && (Array.isArray(result.data.disks) || Array.isArray(result.data.volumes))
+      ? {
+          disks: Array.isArray(result.data.disks) ? result.data.disks : [],
+          volumes: Array.isArray(result.data.volumes) ? result.data.volumes : [],
+        }
+      : null;
+
   const dataEntries =
-    result.data && typeof result.data === "object" && !Array.isArray(result.data)
-      ? Object.entries(result.data as Record<string, unknown>)
+    result.data && typeof result.data === "object" && !Array.isArray(result.data) && !isDiskpartGuide && !diskInventory
+      ? Object.entries(result.data as Record<string, unknown>).filter(([k]) => k !== "commands")
       : [];
 
   const textToCopy = [
     result.action,
     result.message,
     result.path ? `Arquivo: ${result.path}` : "",
-    dataEntries.length
-      ? dataEntries.map(([k, v]) => `${DATA_LABELS[k] ?? k}: ${formatDataValue(v)}`).join("\n")
-      : "",
+    isDiskpartGuide
+      ? diskpartCommands
+          .map((c) => `${c.command} — ${c.title}\n${c.description}\nExemplo: ${c.example}`)
+          .join("\n\n")
+      : dataEntries.length
+        ? dataEntries.map(([k, v]) => `${DATA_LABELS[k] ?? k}: ${formatDataValue(v)}`).join("\n")
+        : "",
     result.output ?? "",
   ]
     .filter(Boolean)
@@ -1103,8 +1144,19 @@ function ResultPanel({
     }
   }
 
+  const riskStyle = (risk: string) => {
+    if (risk === "danger") return "bg-rose-50 text-rose-700 border-rose-200";
+    if (risk === "caution") return "bg-amber-50 text-amber-800 border-amber-200";
+    return "bg-emerald-50 text-emerald-700 border-emerald-200";
+  };
+  const riskLabel = (risk: string) => {
+    if (risk === "danger") return "Destrutivo";
+    if (risk === "caution") return "Atenção";
+    return "Seguro";
+  };
+
   return (
-    <div className="result-panel fixed inset-x-3 bottom-3 z-50 mx-auto flex max-h-[min(72vh,640px)] w-full max-w-[720px] flex-col overflow-hidden rounded-2xl shadow-[0_20px_60px_rgba(15,23,42,.22)] sm:inset-x-auto sm:right-5 sm:bottom-5 sm:left-auto">
+    <div className="result-panel fixed inset-x-3 bottom-3 z-50 mx-auto flex max-h-[min(78vh,720px)] w-full max-w-[760px] flex-col overflow-hidden rounded-2xl shadow-[0_20px_60px_rgba(15,23,42,.22)] sm:inset-x-auto sm:right-5 sm:bottom-5 sm:left-auto">
       <div className="result-panel__header flex items-start gap-3 px-5 py-4">
         <span
           className={`grid h-10 w-10 shrink-0 place-items-center rounded-xl ${
@@ -1141,6 +1193,107 @@ function ResultPanel({
       </div>
 
       <div className="result-panel__body min-h-0 flex-1 overflow-y-auto px-5 py-4">
+        {isDiskpartGuide && (
+          <div className="mb-4 space-y-3">
+            {result.data?.warning && (
+              <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-[11px] leading-5 text-amber-900">
+                <strong className="font-semibold">Atenção: </strong>
+                {String(result.data.warning)}
+              </div>
+            )}
+            <div className="result-panel__card overflow-hidden rounded-xl">
+              <div className="result-panel__card-head flex items-center justify-between px-4 py-2.5">
+                <p className="text-[10px] font-semibold">{String(result.data?.guide_title ?? "Comandos Diskpart")}</p>
+                <span className="result-panel__meta text-[8px] font-medium uppercase tracking-wide">
+                  {diskpartCommands.length} comandos
+                </span>
+              </div>
+              <div className="divide-y divide-[#edf0f4]">
+                {diskpartCommands.map((cmd) => (
+                  <div key={cmd.command} className="px-4 py-3">
+                    <div className="mb-1.5 flex flex-wrap items-center gap-2">
+                      <code className="rounded bg-[#0f172a] px-2 py-0.5 font-mono text-[10px] text-[#7dd3fc]">
+                        {cmd.command}
+                      </code>
+                      <span className={`rounded-full border px-2 py-0.5 text-[8px] font-bold uppercase tracking-wide ${riskStyle(cmd.risk)}`}>
+                        {riskLabel(cmd.risk)}
+                      </span>
+                    </div>
+                    <p className="result-panel__value text-[12px] font-semibold leading-5">{cmd.title}</p>
+                    <p className="result-panel__label mt-1 text-[11px] leading-5">{cmd.description}</p>
+                    <p className="result-panel__meta mt-1.5 font-mono text-[10px]">
+                      Exemplo: {cmd.example}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {diskInventory && (
+          <div className="mb-4 space-y-3">
+            {diskInventory.disks.length > 0 && (
+              <div className="result-panel__card overflow-hidden rounded-xl">
+                <div className="result-panel__card-head px-4 py-2.5">
+                  <p className="text-[10px] font-semibold">Discos físicos ({diskInventory.disks.length})</p>
+                </div>
+                <div className="divide-y divide-[#edf0f4]">
+                  {diskInventory.disks.map((disk: any, idx: number) => (
+                    <div key={idx} className="grid grid-cols-2 gap-2 px-4 py-2.5 text-[11px] sm:grid-cols-4">
+                      <div>
+                        <p className="result-panel__label text-[9px]">Número</p>
+                        <p className="result-panel__value font-semibold">{disk.Number ?? disk.number ?? "—"}</p>
+                      </div>
+                      <div>
+                        <p className="result-panel__label text-[9px]">Nome</p>
+                        <p className="result-panel__value font-semibold">{disk.FriendlyName ?? disk.friendlyName ?? "—"}</p>
+                      </div>
+                      <div>
+                        <p className="result-panel__label text-[9px]">Status</p>
+                        <p className="result-panel__value font-semibold">{disk.OperationalStatus ?? disk.operationalStatus ?? "—"}</p>
+                      </div>
+                      <div>
+                        <p className="result-panel__label text-[9px]">Estilo</p>
+                        <p className="result-panel__value font-semibold">{disk.PartitionStyle ?? disk.partitionStyle ?? "—"}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            {diskInventory.volumes.length > 0 && (
+              <div className="result-panel__card overflow-hidden rounded-xl">
+                <div className="result-panel__card-head px-4 py-2.5">
+                  <p className="text-[10px] font-semibold">Volumes ({diskInventory.volumes.length})</p>
+                </div>
+                <div className="divide-y divide-[#edf0f4]">
+                  {diskInventory.volumes.map((vol: any, idx: number) => (
+                    <div key={idx} className="grid grid-cols-2 gap-2 px-4 py-2.5 text-[11px] sm:grid-cols-4">
+                      <div>
+                        <p className="result-panel__label text-[9px]">Letra</p>
+                        <p className="result-panel__value font-semibold">{vol.DriveLetter ?? vol.driveLetter ?? "—"}</p>
+                      </div>
+                      <div>
+                        <p className="result-panel__label text-[9px]">Rótulo</p>
+                        <p className="result-panel__value font-semibold">{vol.FileSystemLabel ?? vol.fileSystemLabel ?? "—"}</p>
+                      </div>
+                      <div>
+                        <p className="result-panel__label text-[9px]">Sistema</p>
+                        <p className="result-panel__value font-semibold">{vol.FileSystem ?? vol.fileSystem ?? "—"}</p>
+                      </div>
+                      <div>
+                        <p className="result-panel__label text-[9px]">Saúde</p>
+                        <p className="result-panel__value font-semibold">{vol.HealthStatus ?? vol.healthStatus ?? "—"}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
         {dataEntries.length > 0 && (
           <div className="result-panel__card mb-4 overflow-hidden rounded-xl">
             <div className="result-panel__card-head px-4 py-2.5">
@@ -1159,7 +1312,7 @@ function ResultPanel({
           </div>
         )}
 
-        {result.output ? (
+        {result.output && !isDiskpartGuide ? (
           <div className="result-panel__output overflow-hidden rounded-xl">
             <div className="result-panel__output-head flex items-center justify-between px-4 py-2.5">
               <p className="text-[10px] font-semibold">Saída completa</p>
@@ -1172,7 +1325,7 @@ function ResultPanel({
             </pre>
           </div>
         ) : (
-          !dataEntries.length && (
+          !dataEntries.length && !isDiskpartGuide && !diskInventory && (
             <p className="result-panel__empty rounded-xl px-4 py-6 text-center text-[11px]">
               Esta operação não retornou saída textual adicional.
             </p>
@@ -1479,6 +1632,35 @@ function ToolSubpanel({
   const command = actionCommands[action.title] ?? `${module.eyebrow.toLowerCase()} :: ${action.title.toLowerCase()}`;
 
   const isPackageCategory = module.title === "Instalar programas" && action.title !== "Atualizar todos os programas";
+  const isDiskModule = module.title === "Gerenciar discos";
+
+  const diskActionHelp: Record<string, { what: string; does: string; risk: string; tip: string }> = {
+    "Abrir Gerenciamento de Disco": {
+      what: "Ferramenta gráfica nativa do Windows",
+      does: "Abre diskmgmt.msc para visualizar discos, criar/excluir volumes, alterar letras e formatar com interface visual.",
+      risk: "Baixo se você apenas visualizar. Médio ao formatar ou excluir volumes.",
+      tip: "Prefira esta opção se não estiver familiarizado com linha de comando.",
+    },
+    "Listar discos e volumes": {
+      what: "Consulta segura via PowerShell/WMI",
+      does: "Lê e exibe discos físicos e volumes atuais no painel de resultado, sem modificar o armazenamento.",
+      risk: "Nenhum — operação somente leitura.",
+      tip: "Use antes de qualquer alteração para identificar o número do disco e a letra do volume corretos.",
+    },
+    "Guia de comandos Diskpart": {
+      what: "Referência educativa dos comandos Diskpart",
+      does: "Mostra cada comando com título, explicação, nível de risco (seguro / atenção / destrutivo) e exemplo pronto.",
+      risk: "Nenhum — não executa comandos no disco.",
+      tip: "Consulte o guia antes de abrir o console Diskpart interativo.",
+    },
+    "Iniciar Diskpart": {
+      what: "Console interativo diskpart.exe",
+      does: "Abre o prompt do Diskpart. A partir daí, os comandos que você digitar atuam no disco selecionado.",
+      risk: "Alto — clean, format e convert podem apagar dados de forma permanente.",
+      tip: "Sempre rode list disk e select disk N com cuidado. Confirme o número do disco duas vezes.",
+    },
+  };
+  const diskHelp = isDiskModule ? diskActionHelp[action.title] : null;
 
   useEffect(() => {
     if (!isPackageCategory) {
@@ -1547,6 +1729,42 @@ function ToolSubpanel({
           <Icon name="clock" size={14} /><span>{action.meta}</span>
         </div>
       </section>
+
+      {diskHelp && (
+        <section className="mb-5 overflow-hidden rounded-2xl border border-[#e1e5ec] bg-white shadow-[0_1px_2px_rgba(16,24,40,.02)]">
+          <div className="border-b border-[#edf0f4] px-5 py-3">
+            <p className="text-[11px] font-semibold text-[#172136]">O que esta função faz</p>
+            <p className="mt-0.5 text-[9px] text-slate-400">Leia antes de executar — explicação objetiva do comportamento e do risco.</p>
+          </div>
+          <div className="grid gap-0 sm:grid-cols-2">
+            <div className="border-b border-[#edf0f4] px-5 py-4 sm:border-b-0 sm:border-r">
+              <p className="text-[9px] font-bold uppercase tracking-[.12em] text-slate-400">O que é</p>
+              <p className="mt-1.5 text-[12px] font-semibold leading-5 text-[#172136]">{diskHelp.what}</p>
+              <p className="mt-2 text-[11px] leading-5 text-slate-600">{diskHelp.does}</p>
+            </div>
+            <div className="px-5 py-4">
+              <p className="text-[9px] font-bold uppercase tracking-[.12em] text-slate-400">Risco</p>
+              <p className={`mt-1.5 text-[12px] font-semibold leading-5 ${action.danger ? "text-rose-700" : "text-emerald-700"}`}>
+                {diskHelp.risk}
+              </p>
+              <p className="mt-2 text-[11px] leading-5 text-slate-600">
+                <span className="font-semibold text-[#172136]">Dica: </span>
+                {diskHelp.tip}
+              </p>
+            </div>
+          </div>
+          {action.title === "Guia de comandos Diskpart" && (
+            <div className="border-t border-[#edf0f4] bg-[#f8fafc] px-5 py-3 text-[10px] leading-5 text-slate-600">
+              Ao executar, o painel de resultado listará cada comando com etiqueta <strong>Seguro</strong>, <strong>Atenção</strong> ou <strong>Destrutivo</strong>, além de exemplo de uso.
+            </div>
+          )}
+          {action.title === "Iniciar Diskpart" && (
+            <div className="border-t border-rose-100 bg-rose-50 px-5 py-3 text-[10px] leading-5 text-rose-800">
+              O WinHood apenas abre o console. Qualquer comando digitado no Diskpart é de sua responsabilidade. Nunca use <code className="rounded bg-rose-100 px-1">clean</code> no disco do sistema sem certeza absoluta.
+            </div>
+          )}
+        </section>
+      )}
 
       <section className="grid gap-4 xl:grid-cols-[1.4fr_.8fr]">
         <div className="space-y-4">

@@ -432,22 +432,128 @@ def notes_write(text: str):
 
 
 def diskpart_guide():
-    commands = """list disk — lista discos
-list volume — lista volumes
-list partition — lista partições
-select disk N — seleciona um disco
-select volume N — seleciona um volume
-detail disk — mostra detalhes do disco
-detail volume — mostra detalhes do volume
-rescan — procura discos novos
-clean — REMOVE as partições do disco selecionado
-format fs=ntfs quick — formata rapidamente
-assign letter=X — atribui letra
-extend — estende o volume
-shrink desired=MB — reduz o volume
-convert gpt — converte para GPT (disco deve estar vazio)
-exit — sai do Diskpart"""
-    return {"success": True, "action": "Guia de comandos Diskpart", "message": "Guia carregado. Comandos destrutivos exigem confirmação no próprio Diskpart.", "output": commands}
+    commands = [
+        {
+            "command": "list disk",
+            "title": "Listar discos",
+            "description": "Mostra todos os discos físicos detectados (número, tamanho, GPT/MBR e status).",
+            "risk": "safe",
+            "example": "list disk",
+        },
+        {
+            "command": "list volume",
+            "title": "Listar volumes",
+            "description": "Lista partições e volumes com letra de unidade, sistema de arquivos e espaço livre.",
+            "risk": "safe",
+            "example": "list volume",
+        },
+        {
+            "command": "list partition",
+            "title": "Listar partições",
+            "description": "Exibe as partições do disco atualmente selecionado.",
+            "risk": "safe",
+            "example": "list partition",
+        },
+        {
+            "command": "select disk N",
+            "title": "Selecionar disco",
+            "description": "Define qual disco físico será alvo dos próximos comandos. Substitua N pelo número (ex.: 0, 1).",
+            "risk": "caution",
+            "example": "select disk 1",
+        },
+        {
+            "command": "select volume N",
+            "title": "Selecionar volume",
+            "description": "Define o volume/partição ativo para comandos como format, assign ou extend.",
+            "risk": "caution",
+            "example": "select volume 3",
+        },
+        {
+            "command": "detail disk",
+            "title": "Detalhes do disco",
+            "description": "Mostra informações técnicas do disco selecionado (tipo, status, partições).",
+            "risk": "safe",
+            "example": "detail disk",
+        },
+        {
+            "command": "detail volume",
+            "title": "Detalhes do volume",
+            "description": "Mostra detalhes do volume selecionado (letra, rótulo, sistema de arquivos).",
+            "risk": "safe",
+            "example": "detail volume",
+        },
+        {
+            "command": "rescan",
+            "title": "Reexaminar discos",
+            "description": "Força o Windows a procurar discos e volumes novos sem reiniciar.",
+            "risk": "safe",
+            "example": "rescan",
+        },
+        {
+            "command": "clean",
+            "title": "Limpar disco (apaga partições)",
+            "description": "REMOVE todas as partições e dados do disco selecionado. Irreversível sem backup.",
+            "risk": "danger",
+            "example": "clean",
+        },
+        {
+            "command": "format fs=ntfs quick",
+            "title": "Formatar volume",
+            "description": "Formata o volume selecionado em NTFS de forma rápida. Apaga os dados desse volume.",
+            "risk": "danger",
+            "example": "format fs=ntfs quick label=DADOS",
+        },
+        {
+            "command": "assign letter=X",
+            "title": "Atribuir letra",
+            "description": "Associa uma letra de unidade ao volume selecionado (ex.: D, E, F).",
+            "risk": "caution",
+            "example": "assign letter=E",
+        },
+        {
+            "command": "extend",
+            "title": "Estender volume",
+            "description": "Aumenta o volume selecionado usando espaço não alocado adjacente no mesmo disco.",
+            "risk": "caution",
+            "example": "extend",
+        },
+        {
+            "command": "shrink desired=MB",
+            "title": "Reduzir volume",
+            "description": "Diminui o volume selecionado, liberando espaço não alocado. Informe o tamanho em MB.",
+            "risk": "caution",
+            "example": "shrink desired=10240",
+        },
+        {
+            "command": "convert gpt",
+            "title": "Converter para GPT",
+            "description": "Converte o disco selecionado para GPT. O disco precisa estar vazio (sem partições).",
+            "risk": "danger",
+            "example": "convert gpt",
+        },
+        {
+            "command": "exit",
+            "title": "Sair do Diskpart",
+            "description": "Encerra o console Diskpart com segurança.",
+            "risk": "safe",
+            "example": "exit",
+        },
+    ]
+    lines = []
+    for c in commands:
+        risk_label = {"safe": "seguro", "caution": "atenção", "danger": "destrutivo"}.get(c["risk"], c["risk"])
+        lines.append(f"{c['command']}  [{risk_label}]\n  {c['title']}: {c['description']}\n  Exemplo: {c['example']}")
+    return {
+        "success": True,
+        "action": "Guia de comandos Diskpart",
+        "message": "Guia carregado. Comandos marcados como destrutivos podem apagar dados permanentemente.",
+        "output": "\n\n".join(lines),
+        "data": {
+            "guide_title": "Referência Diskpart",
+            "warning": "Sempre confirme o disco/volume com list disk e list volume antes de clean, format ou convert.",
+            "commands": commands,
+        },
+    }
 
 
 def diagnostico_completo():
