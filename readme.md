@@ -70,9 +70,11 @@ O navegador **nunca** executa comandos do Windows diretamente. O fluxo é:
 #### 🚀 Planejado para o futuro
 
 - [ ] Maior biblioteca de aplicativos e serviços no catálogo Winget
-- [ ] Download de ISOs oficiais do Windows e ferramentas de suporte
+- [ ] Varredura de arquivos e malwares com base em biblioteca conhecida (Ex: Virus Total)
 - [ ] Menu de segurança (Defender, Firewall e políticas)
-- [ ] Preparo de pendrives bootáveis
+- [ ] Integração com ChatGPT
+- [ ] Integração para monitoramento com Wazuh
+- [ ] Monitoramento em tempo real e aviso/alerta por email
 - [ ] Progresso em tempo real (SSE/WebSocket) para rotinas longas (SFC/DISM)
 - [x] **Empacotamento em executável único para distribuição** *(Em andamento para a versão 5.0)*
 
